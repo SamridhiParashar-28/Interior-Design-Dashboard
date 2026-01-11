@@ -1,17 +1,26 @@
-                        // ============================================
-                        // Interior Design Dashboard 
-                        // ============================================
+// ============================================
+// Interior Design Dashboard 
+// ============================================
+
+// Global records array (loaded from localStorage)
+let records = JSON.parse(localStorage.getItem('interiorRecords')) || [];
 
 // ============================================
 // CORE DISPLAY FUNCTIONS
 // ============================================
 
-function disp() {
+function disp(filteredRecords = records) {
     const tbody = document.getElementById('recordsTbody');
     if (!tbody) return;
     
     tbody.innerHTML = '';
-    records.forEach((record) => {
+    
+    if (filteredRecords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No records found</td></tr>';
+        return;
+    }
+    
+    filteredRecords.forEach((record) => {
         const row = tbody.insertRow();
         row.innerHTML = `
             <td>${record.acno}</td>
@@ -30,7 +39,7 @@ function updateRecordCount() {
 }
 
 // ============================================
-// NOTIFICATION SYSTEM
+// ENHANCED NOTIFICATION SYSTEM
 // ============================================
 
 function showNotification(message, type = 'info') {
@@ -38,13 +47,17 @@ function showNotification(message, type = 'info') {
     if (!container) return;
     
     const notification = document.createElement('div');
-    notification.className = `notification notification-${type} show`;
+    notification.className = `notification notification-${type}`;
     notification.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
         ${message}
     `;
     container.appendChild(notification);
     
+    // Animate in
+    requestAnimationFrame(() => notification.classList.add('show'));
+    
+    // Auto remove after 4 seconds
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 400);
@@ -52,7 +65,7 @@ function showNotification(message, type = 'info') {
 }
 
 // ============================================
-// SECTION NAVIGATION (FIXED)
+// SECTION NAVIGATION 
 // ============================================
 
 function showSection(sectionName, clickedButton = null) {
@@ -63,14 +76,16 @@ function showSection(sectionName, clickedButton = null) {
     
     // Show target section
     const targetSection = document.getElementById(sectionName);
-    if (targetSection) targetSection.classList.add('active');
+    if (targetSection) {
+        targetSection.classList.add('active');
+        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     
     // Update nav buttons
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     
-    // Highlight clicked button
     if (clickedButton) clickedButton.classList.add('active');
 }
 
@@ -80,6 +95,10 @@ function showSection(sectionName, clickedButton = null) {
 
 function validateAadhaar(acno) {
     return acno && acno.toString().length === 12 && !isNaN(acno);
+}
+
+function saveRecords() {
+    localStorage.setItem('interiorRecords', JSON.stringify(records));
 }
 
 function getFormData(formId) {
@@ -107,10 +126,12 @@ function addrec() {
     // Enhanced validation
     if (!validateAadhaar(acno)) {
         showNotification('❌ Aadhaar must be 12 digits!', 'error');
+        document.getElementById('addAcno')?.focus();
         return;
     }
     if (!name || name.length < 2) {
         showNotification('❌ Name must be at least 2 characters!', 'error');
+        document.getElementById('addName')?.focus();
         return;
     }
     if (!tor || !aor || !bug || bug <= 0) {
@@ -122,21 +143,21 @@ function addrec() {
         return;
     }
     
-    records.push({acno, name, tor, aor, bug});
-    showNotification('✅ Function 2: Record added successfully!', 'success');
+    records.push({acno, name, tor, aor, bug, date: new Date().toLocaleDateString()});
+    saveRecords();
+    showNotification('✅ Record added successfully!', 'success');
     disp();
-    document.getElementById('addAcno').value = '';
-    document.getElementById('addName').value = '';
-    document.getElementById('addTor').value = '';
-    document.getElementById('addAor').value = '';
-    document.getElementById('addBug').value = '';
+    
+    // Reset form with smooth animation
+    const form = document.getElementById('addForm');
+    form?.reset();
 }
 
 // ============================================
-// SEARCH FUNCTIONS
+// SEARCH FUNCTIONS 
 // ============================================
 
-function sear() { // Function 3
+function sear() { 
     const acno = parseInt(document.getElementById('searchAcno')?.value);
     if (!validateAadhaar(acno)) {
         showNotification('❌ Enter valid 12-digit Aadhaar!', 'error');
@@ -144,45 +165,64 @@ function sear() { // Function 3
     }
     const result = records.find(r => r.acno === acno);
     if (result) {
-        showNotification(`✅ Function 3: ${result.name} - ${result.tor} (${result.aor}) ₹${result.bug.toLocaleString()}`, 'success');
+        showNotification(`✅ ${result.name} - ${result.tor} (${result.aor}) ₹${result.bug.toLocaleString()}`, 'success');
+        highlightRecord(result.acno);
     } else {
-        showNotification('❌ Function 3: No record found!', 'error');
+        showNotification('❌ No record found!', 'error');
     }
 }
 
-function searname() { // Function 4
+function searname() { 
     const name = document.getElementById('searchName')?.value?.toLowerCase().trim();
     if (!name) return;
     const results = records.filter(r => r.name.toLowerCase().includes(name));
-    showNotification(`✅ Function 4: ${results.length} match(es) for "${name}"`, results.length ? 'success' : 'error');
+    showNotification(`${results.length} match(es) for "${name}"`, results.length ? 'success' : 'error');
+    if (results.length) disp(results);
 }
 
-function seartor() { // Function 5
+function seartor() { 
     const tor = document.getElementById('searchTor')?.value?.toLowerCase().trim();
     if (!tor) return;
     const results = records.filter(r => r.tor.toLowerCase().includes(tor));
-    showNotification(`✅ Function 5: ${results.length} ${tor} room(s)`, results.length ? 'success' : 'error');
+    showNotification(`${results.length} ${tor} room(s)`, results.length ? 'success' : 'error');
+    if (results.length) disp(results);
 }
 
-function searaor() { // Function 6
+function searaor() { 
     const aor = document.getElementById('searchAor')?.value?.toLowerCase().trim();
     if (!aor) return;
     const results = records.filter(r => r.aor.toLowerCase().includes(aor));
-    showNotification(`✅ Function 6: ${results.length} ${aor} style(s)`, results.length ? 'success' : 'error');
+    showNotification(`${results.length} ${aor} style(s)`, results.length ? 'success' : 'error');
+    if (results.length) disp(results);
 }
 
-function searbug() { // Function 7
+function searbug() { 
     const bug = parseInt(document.getElementById('searchBug')?.value);
     if (!bug || bug < 0) return;
     const results = records.filter(r => r.bug >= bug);
-    showNotification(`✅ Function 7: ${results.length} projects ≥ ₹${bug.toLocaleString()}`, results.length ? 'success' : 'error');
+    showNotification(`${results.length} projects ≥ ₹${bug.toLocaleString()}`, results.length ? 'success' : 'error');
+    if (results.length) disp(results);
+}
+
+function highlightRecord(acno) {
+    const rows = document.querySelectorAll('#recordsTbody tr');
+    rows.forEach(row => row.style.background = '');
+    setTimeout(() => {
+        const targetRow = Array.from(rows).find(row => 
+            row.cells[0].textContent === acno.toString()
+        );
+        if (targetRow) {
+            targetRow.style.background = 'rgba(16, 185, 129, 0.2)';
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 }
 
 // ============================================
-// UPDATE FUNCTIONS
+// UPDATE FUNCTIONS 
 // ============================================
 
-function update() { // Function 8
+function update() {
     const acno = parseInt(document.getElementById('updateAcnoAll')?.value);
     if (!validateAadhaar(acno)) {
         showNotification('❌ Enter valid 12-digit Aadhaar!', 'error');
@@ -190,7 +230,7 @@ function update() { // Function 8
     }
     const record = records.find(r => r.acno === acno);
     if (!record) {
-        showNotification('❌ Function 8: Record not found!', 'error');
+        showNotification('❌ Record not found!', 'error');
         return;
     }
     
@@ -204,7 +244,8 @@ function update() { // Function 8
     if (aor) record.aor = aor;
     if (bug && bug > 0) record.bug = bug;
     
-    showNotification('✅ Function 8: Record updated successfully!', 'success');
+    saveRecords();
+    showNotification('✅ Record updated successfully!', 'success');
     disp();
 }
 
@@ -223,36 +264,23 @@ function updateSingleField(acnoId, fieldId, fieldName, functionNum) {
         return;
     }
     
-    record[fieldName] = newValue;
+    record[fieldName] = fieldName === 'bug' ? parseInt(newValue) : newValue;
+    saveRecords();
     showNotification(`✅ Function ${functionNum}: ${fieldName.toUpperCase()} updated!`, 'success');
     disp();
 }
 
+// Function wrappers 
 function updatename() { updateSingleField('updateAcnoName', 'updateNameSingle', 'name', 9); }
 function updatetor() { updateSingleField('updateAcnoTor', 'updateTorSingle', 'tor', 10); }
 function updateaor() { updateSingleField('updateAcnoAor', 'updateAorSingle', 'aor', 11); }
-function updatebug() { 
-    const acno = parseInt(document.getElementById('updateAcnoBug')?.value);
-    const bug = parseInt(document.getElementById('updateBugSingle')?.value);
-    if (!validateAadhaar(acno) || !bug || bug <= 0) {
-        showNotification('❌ Function 12: Invalid budget!', 'error');
-        return;
-    }
-    const record = records.find(r => r.acno === acno);
-    if (!record) {
-        showNotification('❌ Function 12: Record not found!', 'error');
-        return;
-    }
-    record.bug = bug;
-    showNotification('✅ Function 12: Budget updated!', 'success');
-    disp();
-}
+function updatebug() { updateSingleField('updateAcnoBug', 'updateBugSingle', 'bug', 12); }
 
 // ============================================
 // DELETE FUNCTIONS 
 // ============================================
 
-function del() { // Function 13
+function del() { 
     const acno = parseInt(document.getElementById('deleteAcno')?.value);
     if (!validateAadhaar(acno)) {
         showNotification('❌ Enter valid 12-digit Aadhaar!', 'error');
@@ -260,91 +288,94 @@ function del() { // Function 13
     }
     const record = records.find(r => r.acno === acno);
     if (!record) {
-        showNotification('❌ Function 13: Record not found!', 'error');
+        showNotification('❌ Record not found!', 'error');
         return;
     }
     if (confirm(`Delete "${record.name}" (Aadhaar: ${acno})?`)) {
-        const index = records.findIndex(r => r.acno === acno);
-        records.splice(index, 1);
-        showNotification('✅ Function 13: Record deleted!', 'success');
+        records = records.filter(r => r.acno !== acno);
+        saveRecords();
+        showNotification('✅ Record deleted!', 'error');
         disp();
     }
 }
 
-function delname() { // Function 14
+function delname() { 
     const name = prompt('Enter name to delete:');
     if (!name) return;
     const matches = records.filter(r => r.name.toLowerCase().includes(name.toLowerCase()));
     if (matches.length === 0) {
-        showNotification('❌ Function 14: No records found!', 'error');
+        showNotification('❌ No records found!', 'error');
         return;
     }
     if (matches.length === 1) {
         if (confirm(`Delete "${matches[0].name}"?`)) {
             records = records.filter(r => r.name !== matches[0].name);
-            showNotification('✅ Function 14: Record deleted!', 'success');
+            saveRecords();
+            showNotification('✅ Record deleted!', 'error');
             disp();
         }
     } else {
-        showNotification(`ℹ️ Function 14: ${matches.length} matches found. Use Aadhaar for specific delete.`, 'info');
+        showNotification(`${matches.length} matches found. Use Aadhaar for specific delete.`, 'info');
     }
 }
 
-function deltor() { // Function 15
+function deltor() {
     const tor = prompt('Enter room type to delete all:');
     if (!tor) return;
     const matches = records.filter(r => r.tor.toLowerCase() === tor.toLowerCase());
     if (matches.length === 0) {
-        showNotification('❌ Function 15: No records found!', 'error');
+        showNotification('❌ No records found!', 'error');
         return;
     }
     if (confirm(`Delete ${matches.length} ${tor} records?`)) {
         records = records.filter(r => r.tor.toLowerCase() !== tor.toLowerCase());
-        showNotification(`✅ Function 15: ${matches.length} records deleted!`, 'success');
+        saveRecords();
+        showNotification(`${matches.length} records deleted!`, 'error');
         disp();
     }
 }
 
-function delall() { // Function 18
+function delall() { 
     if (records.length === 0) {
         showNotification('ℹ️ No records to delete!', 'info');
         return;
     }
     if (confirm(`Delete ALL ${records.length} records? This cannot be undone!`)) {
         records = [];
-        showNotification('✅ Function 18: All records deleted!', 'success');
+        localStorage.removeItem('interiorRecords');
+        showNotification('✅ All records deleted!', 'error');
         disp();
     }
 }
 
 // ============================================
-// THEME TOGGLE 
+// THEME TOGGLE
 // ============================================
 
 function initThemeToggle() {
-    const toggle = document.getElementById('themeToggle');
+    const toggle = document.querySelector('.theme-toggle'); 
     if (!toggle) return;
     
     const savedTheme = localStorage.getItem('theme') || 'dark';
-    document.body.dataset.theme = savedTheme;
+    document.documentElement.setAttribute('data-theme', savedTheme);
     
     const isDark = savedTheme === 'dark';
     const icon = toggle.querySelector('i');
     const span = toggle.querySelector('span');
     
-    // FIXED: Correct icon logic
-    icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon'; 
-    span.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    if (icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon'; 
+    if (span) span.textContent = isDark ? 'Light Mode' : 'Dark Mode';
     
     toggle.addEventListener('click', function() {
-        const isDark = document.body.dataset.theme === 'dark';
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const newTheme = isDark ? 'light' : 'dark';
         
-        document.body.dataset.theme = newTheme;
-        icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        span.textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        if (span) span.textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
         
         localStorage.setItem('theme', newTheme);
+        showNotification(`Theme switched to ${newTheme}!`, 'info');
     });
 }
 
@@ -356,11 +387,31 @@ function initNavigation() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            const sectionName = this.dataset.section;
+            const sectionName = this.dataset.section || this.dataset.target; // Support both
             if (sectionName) {
-                showSection(sectionName, this); // Pass button reference
+                showSection(sectionName, this);
             }
         });
+    });
+}
+
+// ============================================
+// FORM EVENT LISTENERS 
+// ============================================
+
+function initForms() {
+    // Auto-focus first input in forms
+    document.querySelectorAll('.input-form input, .form-group input').forEach((input, index) => {
+        if (index === 0) input.focus();
+        
+        // Form reset after successful submission
+        const form = input.closest('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (e.defaultPrevented) return;
+                setTimeout(() => form.reset(), 500);
+            });
+        }
     });
 }
 
@@ -370,9 +421,31 @@ function initNavigation() {
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Interior Design Pro - 18 Functions Dashboard Loaded');
-    disp();
+    
+    // Initialize everything
     initThemeToggle();
     initNavigation();
+    initForms();
+    disp();
     updateRecordCount();
-    console.log(`📊 ${records.length} records loaded`);
+    
+    console.log(`📊 ${records.length} records loaded from localStorage`);
+    showNotification('Dashboard ready! All 18 functions operational.', 'success');
 });
+
+// Export functions globally for HTML onclick
+window.addrec = addrec;
+window.sear = sear;
+window.searname = searname;
+window.seartor = seartor;
+window.searaor = searaor;
+window.searbug = searbug;
+window.update = update;
+window.updatename = updatename;
+window.updatetor = updatetor;
+window.updateaor = updateaor;
+window.updatebug = updatebug;
+window.del = del;
+window.delname = delname;
+window.deltor = deltor;
+window.delall = delall;
