@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interior Design Pro - 18 Functions Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-theme="dark">
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-sun"></i>
+        <span>Light Mode</span>
+    </button>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1><i class="fas fa-cube"></i> Interior Design Dashboard</h1>
+            <p>Complete 18-Function Enterprise Dashboard</p>
+            <div class="record-stats">
+                <span class="stat-item">
+                    <i class="fas fa-list"></i>
+                    <span id="recordCount">4</span> Records
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Navigation -->
+        <nav class="main-nav">
+            <button class="nav-btn active" data-section="display">
+                <i class="fas fa-table-list"></i>
+                <span>Display All</span>
+            </button>
+            <button class="nav-btn" data-section="add">
+                <i class="fas fa-plus-circle"></i>
+                <span>Add Record</span>
+            </button>
+            <button class="nav-btn" data-section="search">
+                <i class="fas fa-magnifying-glass"></i>
+                <span>Search </span>
+            </button>
+            <button class="nav-btn" data-section="update">
+                <i class="fas fa-edit"></i>
+                <span>Update </span>
+            </button>
+            <button class="nav-btn" data-section="delete">
+                <i class="fas fa-trash"></i>
+                <span>Delete </span>
+            </button>
+        </nav>
+
+        <!-- Content Sections -->
+        <main class="content-sections">
+            <!-- Display Section -->
+            <section id="display" class="content-section active">
+                <div class="records-section">
+                    <h2 class="section-title"><i class="fas fa-table-list"></i> All Records </h2>
+                    <div class="table-container">
+                        <table class="records-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-id-card"></i> Aadhaar Number </th>
+                                    <th><i class="fas fa-user"></i> Name</th>
+                                    <th><i class="fas fa-bed"></i> Room</th>
+                                    <th><i class="fas fa-palette"></i> Style</th>
+                                    <th><i class="fas fa-rupee-sign"></i> Budget</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recordsTbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Section -->
+            <section id="add" class="content-section">
+                <div class="function-card add-card">
+                    <h3>Add New Record </h3>
+                    <form onsubmit="addrec(); return false;">
+                        <div class="form-group">
+                            <label><i class="fas fa-id-card"></i> Aadhaar Number</label>
+                            <input type="number" id="addAcno" placeholder="Enter Aadhaar" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Client Name</label>
+                            <input type="text" id="addName" placeholder="Enter client name" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-bed"></i> Room Type</label>
+                                <select id="addTor" required>
+                                    <option value="">Select Room</option>
+                                    <option value="bedroom">Bedroom</option>
+                                    <option value="livingroom">Living Room</option>
+                                    <option value="bathroom">Bathroom</option>
+                                    <option value="kitchen">Kitchen</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-palette"></i> Aesthetic</label>
+                                <select id="addAor" required>
+                                    <option value="">Select Style</option>
+                                    <option value="modern">Modern</option>
+                                    <option value="classic">Classic</option>
+                                    <option value="earthly">Earthly</option>
+                                    <option value="minimal">Minimal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-rupee-sign"></i> Budget (₹)</label>
+                            <input type="number" id="addBug" placeholder="Enter budget" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Add Record
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Search Section (Functions 3-7) -->
+            <section id="search" class="content-section">
+                <h2 class="section-title"><i class="fas fa-magnifying-glass"></i> Search Functions</h2>
+                <div class="functions-grid">
+                    <div class="function-card search-card">
+                        <h3> Search by Aadhaar</h3>
+                        <input type="number" id="searchAcno" placeholder="Enter Aadhaar">
+                        <button class="btn btn-success" onclick="sear()">Search</button>
+                    </div>
+                    <div class="function-card search-card">
+                        <h3> Search by Name</h3>
+                        <input type="text" id="searchName" placeholder="Enter name">
+                        <button class="btn btn-success" onclick="searname()">Search</button>
+                    </div>
+                    <div class="function-card search-card">
+                        <h3> Search by Room</h3>
+                        <input type="text" id="searchTor" placeholder="Enter room type">
+                        <button class="btn btn-success" onclick="seartor()">Search</button>
+                    </div>
+                    <div class="function-card search-card">
+                        <h3> Search by Style</h3>
+                        <input type="text" id="searchAor" placeholder="Enter style">
+                        <button class="btn btn-success" onclick="searaor()">Search</button>
+                    </div>
+                    <div class="function-card search-card">
+                        <h3> Search by Budget</h3>
+                        <input type="number" id="searchBug" placeholder="Enter budget">
+                        <button class="btn btn-success" onclick="searbug()">Search</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Update Section (Functions 8-12) -->
+            <section id="update" class="content-section">
+                <h2 class="section-title"><i class="fas fa-edit"></i> Update Functions</h2>
+                <div class="functions-grid">
+                    <div class="function-card update-card">
+                        <h3>Update All Fields</h3>
+                        <input type="number" id="updateAcnoAll" placeholder="Aadhaar">
+                        <div class="form-row">
+                            <input type="text" id="updateName" placeholder="Name">
+                            <input type="text" id="updateTor" placeholder="Room">
+                        </div>
+                        <div class="form-row">
+                            <input type="text" id="updateAor" placeholder="Style">
+                            <input type="number" id="updateBug" placeholder="Budget">
+                        </div>
+                        <button class="btn btn-primary" onclick="update()">Update All</button>
+                    </div>
+                    <div class="function-card update-card">
+                        <h3> Update Name Only</h3>
+                        <div class="form-row">
+                            <input type="number" id="updateAcnoName" placeholder="Aadhaar">
+                            <input type="text" id="updateNameSingle" placeholder="New name">
+                        </div>
+                        <button class="btn btn-primary" onclick="updatename()">Update Name</button>
+                    </div>
+                    <div class="function-card update-card">
+                        <h3> Update Room Only</h3>
+                        <div class="form-row">
+                            <input type="number" id="updateAcnoTor" placeholder="Aadhaar">
+                            <input type="text" id="updateTorSingle" placeholder="New room">
+                        </div>
+                        <button class="btn btn-primary" onclick="updatetor()">Update Room</button>
+                    </div>
+                    <div class="function-card update-card">
+                        <h3> Update Style Only</h3>
+                        <div class="form-row">
+                            <input type="number" id="updateAcnoAor" placeholder="Aadhaar">
+                            <input type="text" id="updateAorSingle" placeholder="New style">
+                        </div>
+                        <button class="btn btn-primary" onclick="updateaor()">Update Style</button>
+                    </div>
+                    <div class="function-card update-card">
+                        <h3> Update Budget Only</h3>
+                        <div class="form-row">
+                            <input type="number" id="updateAcnoBug" placeholder="Aadhaar">
+                            <input type="number" id="updateBugSingle" placeholder="New budget">
+                        </div>
+                        <button class="btn btn-primary" onclick="updatebug()">Update Budget</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ✅ FIXED DELETE SECTION (Functions 13-18) - COMPLETE -->
+            <section id="delete" class="content-section">
+                <h2 class="section-title"><i class="fas fa-trash"></i> Delete Functions</h2>
+                <div class="functions-grid">
+                    <!-- Function 13: Delete by Aadhaar -->
+                    <div class="function-card delete-card">
+                        <h3> Delete by Aadhaar</h3>
+                        <div class="form-row">
+                            <input type="number" id="deleteAcno" placeholder="Enter Aadhaar">
+                            <button class="btn btn-danger" onclick="del()">Delete</button>
+                        </div>
+                    </div>
+
+                    <!-- Function 14: Delete by Name -->
+                    <div class="function-card delete-card">
+                        <h3> Delete by Name</h3>
+                        <div class="form-row">
+                            <input type="text" id="deleteName" placeholder="Enter client name">
+                            <button class="btn btn-danger" onclick="delname()">Delete</button>
+                        </div>
+                    </div>
+
+                    <!-- Function 15: Delete by Room -->
+                    <div class="function-card delete-card">
+                        <h3> Delete by Room</h3>
+                        <div class="form-row">
+                            <input type="text" id="deleteTor" placeholder="Enter room type">
+                            <button class="btn btn-danger" onclick="deltor()">Delete All</button>
+                        </div>
+                    </div>
+
+                    <!-- Function 16: Delete by Style -->
+                    <div class="function-card delete-card">
+                        <h3> Delete by Style</h3>
+                        <div class="form-row">
+                            <input type="text" id="deleteAor" placeholder="Enter style">
+                            <button class="btn btn-danger" onclick="delaor()">Delete All</button>
+                        </div>
+                    </div>
+
+                    <!-- Function 17: Delete by Budget Range -->
+                    <div class="function-card delete-card">
+                        <h3> Delete ≥ Budget</h3>
+                        <div class="form-row">
+                            <input type="number" id="deleteBug" placeholder="Min budget (₹)">
+                            <button class="btn btn-danger" onclick="delbug()">Delete All</button>
+                        </div>
+                    </div>
+
+                    <!-- Function 18: Delete All Records (DANGER ZONE) -->
+                    <div class="function-card delete-card danger-zone">
+                        <h3> Delete ALL Records ⚠️</h3>
+                        <p style="color: #fca5a5; font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-exclamation-triangle"></i> This will delete ALL records permanently!
+                        </p>
+                        <button class="btn btn-danger delete-all-btn" onclick="delall()">
+                            <i class="fas fa-skull-crossbones"></i> DELETE ALL
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
