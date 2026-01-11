@@ -1,6 +1,6 @@
                                   # Interior-Design-Dashboard
 #📁 File Structure
-📁 interior-design-Dashboard/
+📁 interior-design-Dashboard
 ├── 📄 index.html       # UI + 18 Function Forms
 ├── 🎨 styles.css       # Glassmorphism + Responsive
 ├── ⚙️ script.js        # CRUD Logic + Persistence
